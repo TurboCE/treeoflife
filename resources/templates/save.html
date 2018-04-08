@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-12">
+    <h2 class="alert alert-success">Save Completed!!</h2>
+    pagekey : {{pagekey}}<br><br>
+    <b>* title</b><br>{{title}}<br><br>
+    <b>* option</b><br>{{option}}<br><br>
+    <b>* body</b><br><pre>{{body}}</pre><br><br>
+
+    <a href="{{servlet-context}}/view?pagekey={{pagekey}}">back</a>
+  </div>
+</div>
+{% endblock %}

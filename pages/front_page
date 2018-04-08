@@ -1,0 +1,1 @@
+{:title "Front Page", :option "{:filter \"markdown\"}", :body "#### Tree Of Life\r\n[Luminus](http://www.luminusweb.net/)를 이용해서 개발한 위키 형식의 *Web Framework*입니다.\r\n\r\n홈페이지 운영을 쉽게 하고자 개발하였으며, 많은 실험을 해보고자 합니다.\r\n\r\n\r\n#### 잡동사니들\r\nTest second page\r\n* [할일 정리](http://dekaf.mizzy.kr/view?pagekey=todo)\r\n* [링크 정리](http://dekaf.mizzy.kr/view?pagekey=link)"}

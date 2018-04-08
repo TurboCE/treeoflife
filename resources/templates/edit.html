@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-12">
+    <form action="save" method="post">
+      {% csrf-field %}
+      <h3>Page Key : {{pagekey}}</h3><input type="hidden" name="pagekey" value="{{pagekey}}"><br>
+      <h3>Title</h3><input type="text" width="80%" name="title" value="{{title}}">
+      <h3>Option</h3><input type="text" width="80%" name="option" value="{{option}}">
+      <h3>Body</h3>
+      <textarea rows="15" cols="80" type="text" name="body">{{body}}</textarea>
+      <br>
+      <input type="submit">
+    </form>
+  </div>
+</div>
+{% endblock %}
