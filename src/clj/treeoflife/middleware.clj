@@ -13,9 +13,26 @@
             [treeoflife.config :refer [env]]
             [ring.middleware.flash :refer [wrap-flash]]
             [immutant.web.middleware :refer [wrap-session]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [buddy.auth.middleware :refer [wrap-authentication]]
+            [buddy.auth.backends.session :refer [session-backend]]
+            [buddy.auth.accessrules :refer [wrap-access-rules]]
+            [buddy.auth :refer [authenticated?]])
   (:import [javax.servlet ServletContext]
            [org.joda.time ReadableInstant]))
+
+;; auth
+(defn on-error
+  [request value]
+  {:status 403
+   :headers {}
+   :body "Not authorized"})
+
+(def rules
+  [{:uri "/restricted"
+    :handler authenticated?}
+   {:uri "/setting"
+    :handler authenticated?}])
 
 (defn wrap-context [handler]
   (fn [request]
@@ -90,8 +107,10 @@
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
-        (-> site-defaults
-            (assoc-in [:security :anti-forgery] false)
-            (dissoc :session)))
+       (-> site-defaults
+           (assoc-in [:security :anti-forgery] false)
+           (dissoc :session)))
       wrap-context
-      wrap-internal-error))
+      wrap-internal-error
+      (wrap-access-rules {:rules rules :on-error on-error})
+      (wrap-authentication (session-backend))))

@@ -14,11 +14,11 @@
 (mount/defstate app
   :start
   (middleware/wrap-base
-    (routes
-      (-> #'home-routes
-          (wrap-routes middleware/wrap-csrf)
-          (wrap-routes middleware/wrap-formats))
-      (route/not-found
-        (:body
-          (error-page {:status 404
-                       :title "page not found"}))))))
+   (routes
+    (-> #'home-routes
+        (wrap-routes middleware/wrap-csrf)
+        (wrap-routes middleware/wrap-formats))
+    (route/not-found
+     (:body
+      (error-page {:status 404
+                   :title "page not found"}))))))
