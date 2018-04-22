@@ -3,7 +3,7 @@
 {% block header %}
 <div class="row">
   <div class="col-sm-12">
-    {{header|raw}}
+    {{header}}
   </div>
 </div>
 {% endblock %}
@@ -12,7 +12,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>{{title}}</h3>
-    {{body|raw}}
+    {{body|markdown}}
   </div>
 </div>
 {% endblock %}
@@ -20,7 +20,7 @@
 {% block footer %}
 <div class="row">
   <div class="col-sm-12">
-    {{footer|raw}}
+    {{footer}}
   </div>
 </div>
 {% endblock %}

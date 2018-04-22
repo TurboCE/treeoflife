@@ -1,1 +1,1 @@
-{:title "page not found!", :body "page not found"}
+{:title "page not found!", :option "{:document :markdown, :header nav-bar, :footer nil}", :body "page not found"}

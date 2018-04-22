@@ -10,19 +10,32 @@
 (parser/set-resource-path!  (clojure.java.io/resource "templates"))
 (parser/add-tag! :csrf-field (fn [_ _] (anti-forgery-field)))
 (filters/add-filter! :markdown (fn [content] [:safe (md-to-html-string content)]))
+(filters/add-filter! :clojure (fn [content] [:safe (eval (read-string content))]))
+(filters/add-filter! :raw (fn [content] [:safe content]))
 
 (defn render
   "renders the HTML template located relative to resources/templates"
   [template & [params]]
   (content-type
-    (ok
-      (parser/render-file
-        template
-        (assoc params
-          :page template
+   (ok
+    (parser/render-file
+     template
+     (assoc params
+            :page template
+            :csrf-token *anti-forgery-token*
+            :servlet-context *app-context*)))
+   "text/html; charset=utf-8"))
+
+                                        ;문서가 아니라 스트링 일부를 selmar 타입으로 파싱
+(defn render-string
+  "renders the HTML template located relative to resources/templates"
+  [text & [params]]
+  (parser/render
+   text
+   (assoc params
+          :page nil
           :csrf-token *anti-forgery-token*
           :servlet-context *app-context*)))
-    "text/html; charset=utf-8"))
 
 (defn error-page
   "error-details should be a map containing the following keys:
