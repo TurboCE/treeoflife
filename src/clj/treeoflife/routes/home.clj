@@ -61,7 +61,6 @@
   (let [page_contents (get_contents pagekey)
         page_option (:option page_contents)
         page_template (case (:document page_option)
-                        :clojure "view_clojure.html"
                         :latex "view_latex.html"
                         :file "view_file.html"
                         "view.html")
