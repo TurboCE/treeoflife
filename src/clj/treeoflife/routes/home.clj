@@ -3,6 +3,8 @@
             [compojure.core :refer [defroutes GET POST]]
             [markdown.core :refer [md-to-html-string]]
             [ring.util.http-response :as response]
+	    [ring.util.response :refer [response]]
+	    [clojure.tools.logging :as log]
             [clojure.java.io :as io]
             [clojure.edn :as edn]))
 
@@ -47,8 +49,8 @@
                    page_contents)
         header-page (:header page_option)
         footer-page (:footer page_option)
-        header (if-not (= header-page nil) (:body (parse-page (get_contents header-page))))
-        footer (if-not (= footer-page nil) (:body (parse-page (get_contents footer-page))))]
+        header (if-not (= header-page nil) (:body (parse-page (get_contents header-page) params)))
+        footer (if-not (= footer-page nil) (:body (parse-page (get_contents footer-page) params)))]
     (if-not (= contents nil)
       (merge (assoc page_contents :body (str contents))
              {:header header, :footer footer}
@@ -64,7 +66,7 @@
                         :latex "view_latex.html"
                         :file "view_file.html"
                         "view.html")
-        contents (parse-page page_contents)]
+        contents (parse-page page_contents {:pagekey pagekey})]
     (layout/render
      page_template
      (if-not (= contents nil)
@@ -103,18 +105,48 @@
 (defn login-page []
   (layout/render "login.html"))
 
-(def user {:id "dekaf" :pass "test"})
+(def user-db {:id "dekaf" :pass "test"})
 
 (defn login! [username password {session :session}]
-  (when (= password (user :pass))
+  (when (= password (user-db :pass))
     (assoc :session (assoc session :identity username))))
+
+(defn set-user! [id passwd {session :session}]
+  (-> (if (= passwd (user-db :pass))
+        (->
+         (response (str "Login Ok. User set to: " id))
+         (assoc :session (assoc session :user id :level 0)))
+        (response (str "Login Failed")))
+      (assoc :headers {"Content-Type" "text/plain"})
+      ))
+
+(defn remove-user! [{session :session}]
+  (-> (response "User removed")
+      (assoc :session (dissoc session :user :level))
+      (assoc :headers {"Content-Type" "text/plain"})))
+
+(defn clear-session! []
+  (-> (response "Session cleared")
+      (dissoc :session)
+      (assoc :headers {"Content-Type" "text/plain"})))
+
+(defn check-session [{session :session}]
+  (-> (response (str "current id : " (session :user)))
+      (assoc :headers {"Content-Type" "text/plain"})))
+
+(defroutes admin-routes
+  (GET "/edit" [pagekey title body] (edit-page pagekey))
+  (POST "/save" [pagekey title option body] (save-page pagekey title option body))
+  )
 
 (defroutes home-routes
   (GET "/" [] (view-page "front_page"))
-  (GET "/login" [] (login-page))
-  (POST "/login" [username password :as req] (login! username password req))
-  (GET "/edit" [pagekey title body] (edit-page pagekey))
-  (POST "/save" [pagekey title option body] (save-page pagekey title option body))
+                                        ;  (GET "/login" [] (login-page))
+                                        ;  (POST "/login" [username password :as req] (login! username password req))
+  (GET "/login" [id passwd :as req] (set-user! id passwd req))
+  (GET "/remove" req (remove-user! req))
+  (GET "/logout" req (clear-session!))
+  (GET "/check" req (check-session req))
   (GET "/view" [pagekey] (view-page pagekey))
   (GET "/docs" [] (docs-page))
   (GET "/about" [] (about-page)))

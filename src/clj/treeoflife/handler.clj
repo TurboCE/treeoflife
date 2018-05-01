@@ -16,6 +16,7 @@
   (middleware/wrap-base
    (routes
     (-> #'home-routes
+        #'admin-routes
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
     (route/not-found
