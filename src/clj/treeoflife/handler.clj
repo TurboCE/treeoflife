@@ -1,7 +1,8 @@
 (ns treeoflife.handler
   (:require [compojure.core :refer [routes wrap-routes]]
             [treeoflife.layout :refer [error-page]]
-            [treeoflife.routes.home :refer [home-routes]]
+            [treeoflife.routes.home :refer [home-routes admin-routes]]
+;            [treeoflife.routes.auth :refer [auth-routes]]
             [compojure.route :as route]
             [treeoflife.env :refer [defaults]]
             [mount.core :as mount]
@@ -15,9 +16,16 @@
   :start
   (middleware/wrap-base
    (routes
-    (-> #'home-routes
+    (->
+        #'home-routes
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
+    (->
+        #'admin-routes
+        (wrap-routes middleware/wrap-csrf)
+        (wrap-routes middleware/wrap-formats)
+        (wrap-routes middleware/wrap-restricted)
+        )
     (route/not-found
      (:body
       (error-page {:status 404

@@ -38,7 +38,9 @@
     </div>
     <hr>
     <div align="right">
-      <a href="{{servlet-context}}/edit?pagekey={{pagekey}}">edit</a>
+      {% block system  %}
+      {% endblock %}
+      <a href="{{servlet-context}}/edit?pagekey={{pagekey}}">e</a>
     </div>
   </body>
 </html>

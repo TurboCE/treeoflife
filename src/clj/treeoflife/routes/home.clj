@@ -3,6 +3,7 @@
             [compojure.core :refer [defroutes GET POST]]
             [markdown.core :refer [md-to-html-string]]
             [ring.util.http-response :as response]
+            [treeoflife.routes.auth :refer [auth-routes]]
 	    [ring.util.response :refer [response]]
 	    [clojure.tools.logging :as log]
             [clojure.java.io :as io]
@@ -57,23 +58,29 @@
              )
       page_contents)))
 
-                                        ; type에 따라 분기시킨다.
-                                        ; markdown으로 가느냐, clojure로 가느냐, latex로 가느냐, native web으로 가느냐
-(defn view-page [pagekey]
-  (let [page_contents (get_contents pagekey)
+(defn get_auth_info [session]
+  (if-not (= session nil)
+  {:user (session :user), :level (session :level), :identity (session :identity)}
+  {:user nil, :level 999}))
+
+; type에 따라 분기시킨다.
+; markdown으로 가느냐, clojure로 가느냐, latex로 가느냐, native web으로 가느냐
+(defn view-page [pagekey {session :session}]
+  (let [page_contents (get_contents pagekey )
         page_option (:option page_contents)
         page_template (case (:document page_option)
                         :latex "view_latex.html"
                         :file "view_file.html"
                         "view.html")
-        contents (parse-page page_contents {:pagekey pagekey})]
+        contents (parse-page page_contents (merge {:pagekey pagekey} (get_auth_info session)))]
     (layout/render
      page_template
-     (if-not (= contents nil)
+     (merge (if-not (= contents nil)
        (merge {:pagekey pagekey} contents)
-       (merge {:pagekey pagekey} (parse-page (get_contents "page_not_found")))))))
+       (merge {:pagekey pagekey} (parse-page (get_contents "page_not_found"))))
+       {:system ""}))))
 
-(defn edit-page [pagekey]
+(defn edit-page [pagekey {session :session}]
   (let [contents (get_contents pagekey)]
     (layout/render
      "view.html"
@@ -82,9 +89,10 @@
       (parse-page (get_contents "edit-page")
                   (merge {:pagekey pagekey} (if (= contents nil)
                                               {:option {:document :markdown, :header 'nav-bar, :footer nil}}
-                                              contents)))
+                                              contents) (get_auth_info session)))
       ))))
 
+; TODO: Save할 때 clojure runtime check
 (defn save-page [pagekey title option body]
   (let [contents (save_contents pagekey title option body)]
     (layout/render
@@ -105,48 +113,14 @@
 (defn login-page []
   (layout/render "login.html"))
 
-(def user-db {:id "dekaf" :pass "test"})
-
-(defn login! [username password {session :session}]
-  (when (= password (user-db :pass))
-    (assoc :session (assoc session :identity username))))
-
-(defn set-user! [id passwd {session :session}]
-  (-> (if (= passwd (user-db :pass))
-        (->
-         (response (str "Login Ok. User set to: " id))
-         (assoc :session (assoc session :user id :level 0)))
-        (response (str "Login Failed")))
-      (assoc :headers {"Content-Type" "text/plain"})
-      ))
-
-(defn remove-user! [{session :session}]
-  (-> (response "User removed")
-      (assoc :session (dissoc session :user :level))
-      (assoc :headers {"Content-Type" "text/plain"})))
-
-(defn clear-session! []
-  (-> (response "Session cleared")
-      (dissoc :session)
-      (assoc :headers {"Content-Type" "text/plain"})))
-
-(defn check-session [{session :session}]
-  (-> (response (str "current id : " (session :user)))
-      (assoc :headers {"Content-Type" "text/plain"})))
-
 (defroutes admin-routes
-  (GET "/edit" [pagekey title body] (edit-page pagekey))
+  (GET "/edit" [pagekey title body :as req] (edit-page pagekey req))
   (POST "/save" [pagekey title option body] (save-page pagekey title option body))
   )
 
 (defroutes home-routes
-  (GET "/" [] (view-page "front_page"))
-                                        ;  (GET "/login" [] (login-page))
-                                        ;  (POST "/login" [username password :as req] (login! username password req))
-  (GET "/login" [id passwd :as req] (set-user! id passwd req))
-  (GET "/remove" req (remove-user! req))
-  (GET "/logout" req (clear-session!))
-  (GET "/check" req (check-session req))
-  (GET "/view" [pagekey] (view-page pagekey))
+  (GET "/" req (view-page "front_page" req))
+  (GET "/view" [pagekey :as req] (view-page pagekey req))
   (GET "/docs" [] (docs-page))
-  (GET "/about" [] (about-page)))
+  (GET "/about" [] (about-page))
+  auth-routes)

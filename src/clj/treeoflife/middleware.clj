@@ -14,25 +14,14 @@
             [ring.middleware.flash :refer [wrap-flash]]
             [immutant.web.middleware :refer [wrap-session]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [buddy.auth.middleware :refer [wrap-authentication]]
+
+            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
             [buddy.auth.backends.session :refer [session-backend]]
-            [buddy.auth.accessrules :refer [wrap-access-rules]]
+            [buddy.auth.accessrules :refer [restrict]]
             [buddy.auth :refer [authenticated?]])
   (:import [javax.servlet ServletContext]
            [org.joda.time ReadableInstant]))
 
-;; auth
-(defn on-error
-  [request value]
-  {:status 403
-   :headers {}
-   :body "Not authorized"})
-
-(def rules
-  [{:uri "/restricted"
-    :handler authenticated?}
-   {:uri "/setting"
-    :handler authenticated?}])
 
 (defn wrap-context [handler]
   (fn [request]
@@ -101,8 +90,29 @@
       ;; since they're not compatible with this middleware
       ((if (:websocket? request) handler wrapped) request))))
 
+;; auth
+;(defn on-error [request response]
+;  {:status  403
+;   :headers {"Content-Type" "text/plain"}
+;   :body    (str "Access to " (:uri request) " is not authorized")})
+(defn on-error [request response]
+  (error-page {:status 403
+               :title "Access Denied"
+               :message (str "Access to " (:uri request) " is not authorized")}))
+
+(defn wrap-restricted [handler]
+  (restrict handler {:handler authenticated?
+                     :on-error on-error}))
+
+(defn wrap-auth [handler]
+  (let [backend (session-backend)]
+    (-> handler
+        (wrap-authentication backend)
+        (wrap-authorization backend))))
+
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
+      wrap-auth
       wrap-webjars
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
@@ -111,6 +121,4 @@
            (assoc-in [:security :anti-forgery] false)
            (dissoc :session)))
       wrap-context
-      wrap-internal-error
-      (wrap-access-rules {:rules rules :on-error on-error})
-      (wrap-authentication (session-backend))))
+      wrap-internal-error))
