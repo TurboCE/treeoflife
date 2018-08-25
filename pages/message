@@ -1,0 +1,1 @@
+{:title "", :option "{:document :html, :header nav-bar, :footer nil}", :body "Message<br>\r\n<h2 class=\"alert alert-success\">{{message}}</h2>\r\n"}

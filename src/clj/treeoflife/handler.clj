@@ -2,7 +2,6 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [treeoflife.layout :refer [error-page]]
             [treeoflife.routes.home :refer [home-routes admin-routes]]
-;            [treeoflife.routes.auth :refer [auth-routes]]
             [compojure.route :as route]
             [treeoflife.env :refer [defaults]]
             [mount.core :as mount]
