@@ -7,7 +7,7 @@
   [(str/replace text #"\[\[([\w -]+)\]\]"
               (fn [i]
                 (let [link-text (i 1)
-                      link-ref (.toLowerCase (s/replace link-text " " "-"))]
+                      link-ref (.toLowerCase (str/replace link-text " " "-"))]
                   (str "<a href=\"/view/" link-ref "\">" link-text "</a>"))))
    state])
 
