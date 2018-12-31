@@ -7,9 +7,17 @@
   [(str/replace text #"\[\[([\w -]+)\]\]"
               (fn [i]
                 (let [link-text (i 1)
-                      link-ref (.toLowerCase (s/replace link-text " " "-"))]
+                      link-ref (.toLowerCase (str/replace link-text " " "-"))]
                   (str "<a href=\"/view/" link-ref "\">" link-text "</a>"))))
    state])
+
+(defn web-links
+ [text state]
+ [(str/replace text #"\[(https?://[\w\./]+)\]"
+             (fn [i]
+               (let [link-text (i 1)]
+                 (str "<a href=\"" link-text "\">" link-text "</a>"))))
+  state])
 
 
 (defn capitalize [text state]
@@ -17,7 +25,7 @@
 
 (defn wiki-markdown
   [content]
-  (md-to-html-string content :custom-transformers [wiki-links]))
+  (md-to-html-string content :custom-transformers [wiki-links web-links]))
 
 (defn wiki-clojure
   [content]
