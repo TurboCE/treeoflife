@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 {:title "Front Page", :option "{:document :markdown, :header nav-bar, :footer nil}", :body "안녕하세요\r\n이곳은 제 개인 홈페이지 및 자료를 저장해두는 곳입니다.\r\n방문해주셔서 감사합니다. 별도로 방명록을 준비할 예정입니다.\r\n\r\n\r\n#### 잡동사니들\r\n\r\n* [할일 정리](http://dekaf.mizzy.kr/view/todo)\r\n* [진행중인 프로젝트](http://dekaf.mizzy.kr/view/projects)\r\n* [링크 정리](http://dekaf.mizzy.kr/view/link)\r\n* [Usage](http://dekaf.mizzy.kr/view/help)\r\n* [[test about]]"}
-=======
-{:title "Front Page", :option "{:document :markdown, :header nav-bar, :footer nil}", :body "#### Tree Of Life\r\n[Luminus](http://www.luminusweb.net/)를 이용해서 개발한 위키 형식의 *Web Framework*입니다.\r\n\r\n홈페이지 운영을 쉽게 하고자 개발하였으며, 많은 실험을 해보고자 합니다.\r\n\r\n\r\n#### 잡동사니들\r\nTest second page\r\n* [할일 정리](http://dekaf.mizzy.kr/view?pagekey=todo)\r\n* [링크 정리](http://dekaf.mizzy.kr/view?pagekey=link)"}
->>>>>>> f0ebee605b38bdf81c7389475c27c7f96cea1bff
